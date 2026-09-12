@@ -8,6 +8,7 @@
 , xdg-utils
 , shared-mime-info
 , adept2-runtime
+, pipewire
 }:
 
 let
@@ -37,6 +38,7 @@ stdenv.mkDerivation {
     qt6.qtmultimedia
     qt6.qtserialport
     qt6.qtdeclarative
+    pipewire
   ];
 
   runtimeDependencies = [ adept2-runtime ];
@@ -47,6 +49,7 @@ stdenv.mkDerivation {
     qtWrapperArgs+=(--set LD_PRELOAD $out/lib/${rewriteUsr})
     qtWrapperArgs+=(--prefix PATH : $out/libexec:$out/bin)
     qtWrapperArgs+=(--set DIGILENT_ADEPT_CONF ${adept2-runtime}/etc/digilent-adept.conf)
+    qtWrapperArgs+=(--suffix LD_LIBRARY_PATH : ${lib.getLib pipewire}/lib)
   '';
 
   buildPhase = ''
