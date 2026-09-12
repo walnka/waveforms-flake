@@ -21,6 +21,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     inherit (srcInfo) url hash;
+    curlOptsList = [ "--user-agent" "Nixpkgs/${lib.trivial.release}" ];
   };
 
   nativeBuildInputs = [ dpkg autoPatchelfHook ];
@@ -47,8 +48,23 @@ stdenv.mkDerivation rec {
 
     cat > $out/etc/udev/rules.d/52-digilent-usb.rules <<EOF
     ACTION=="add", ATTR{idVendor}=="1443", GROUP="plugdev", TAG+="uaccess"
+    SUBSYSTEM=="usb_interface", ACTION=="add", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6014", ATTRS{manufacturer}=="Digilent", GROUP="plugdev", TAG+="uaccess", RUN+="$out/sbin/release-ftdi %k"
     ACTION=="add", ATTR{idVendor}=="0403", ATTR{manufacturer}=="Digilent", GROUP="plugdev", TAG+="uaccess", RUN+="$out/sbin/dftdrvdtch %s{busnum} %s{devnum}"
     EOF
+
+    cat > $out/sbin/release-ftdi <<EOF
+    #!${stdenv.shell}
+    # Detach the Analog Discovery 2 (FTDI FT232H, 0403:6014) from ftdi_sio
+    # so the Digilent Adept runtime can use it via libusb. Waiting a beat
+    # avoids the race where ftdi_sio rebinds after this rule runs.
+    dev="\$1"
+    [ -n "\$dev" ] || exit 0
+    sleep 0.5
+    [ -w /sys/bus/usb/drivers/ftdi_sio/unbind ] || exit 0
+    echo "\$dev" > /sys/bus/usb/drivers/ftdi_sio/unbind 2>/dev/null || true
+    exit 0
+    EOF
+    chmod +x $out/sbin/release-ftdi
 
     runHook postInstall
   '';

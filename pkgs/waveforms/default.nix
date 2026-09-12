@@ -4,10 +4,11 @@
 , fetchurl
 , autoPatchelfHook
 , dpkg
-, qt5
+, qt6
 , xdg-utils
 , shared-mime-info
 , adept2-runtime
+, pipewire
 }:
 
 let
@@ -26,11 +27,19 @@ stdenv.mkDerivation {
 
   src = fetchurl {
     inherit (srcInfo) url hash;
+    curlOptsList = [ "--user-agent" "Nixpkgs/${lib.trivial.release}" ];
   };
 
-  nativeBuildInputs = [ dpkg autoPatchelfHook qt5.wrapQtAppsHook shared-mime-info ];
+  nativeBuildInputs = [ dpkg autoPatchelfHook qt6.wrapQtAppsHook shared-mime-info ];
 
-  buildInputs = [ adept2-runtime qt5.qtbase qt5.qtscript qt5.qtmultimedia qt5.qtserialport ];
+  buildInputs = [
+    adept2-runtime
+    qt6.qtbase
+    qt6.qtmultimedia
+    qt6.qtserialport
+    qt6.qtdeclarative
+    pipewire
+  ];
 
   runtimeDependencies = [ adept2-runtime ];
 
@@ -40,6 +49,7 @@ stdenv.mkDerivation {
     qtWrapperArgs+=(--set LD_PRELOAD $out/lib/${rewriteUsr})
     qtWrapperArgs+=(--prefix PATH : $out/libexec:$out/bin)
     qtWrapperArgs+=(--set DIGILENT_ADEPT_CONF ${adept2-runtime}/etc/digilent-adept.conf)
+    qtWrapperArgs+=(--suffix LD_LIBRARY_PATH : ${lib.getLib pipewire}/lib)
   '';
 
   buildPhase = ''
