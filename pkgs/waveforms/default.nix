@@ -26,6 +26,7 @@ stdenv.mkDerivation {
 
   src = fetchurl {
     inherit (srcInfo) url hash;
+    curlOptsList = [ "--user-agent" "Nixpkgs/${lib.trivial.release}" ];
   };
 
   nativeBuildInputs = [ dpkg autoPatchelfHook qt5.wrapQtAppsHook shared-mime-info ];

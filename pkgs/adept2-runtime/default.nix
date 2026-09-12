@@ -21,6 +21,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     inherit (srcInfo) url hash;
+    curlOptsList = [ "--user-agent" "Nixpkgs/${lib.trivial.release}" ];
   };
 
   nativeBuildInputs = [ dpkg autoPatchelfHook ];
