@@ -4,7 +4,7 @@
 , fetchurl
 , autoPatchelfHook
 , dpkg
-, qt5
+, qt6
 , xdg-utils
 , shared-mime-info
 , adept2-runtime
@@ -29,9 +29,15 @@ stdenv.mkDerivation {
     curlOptsList = [ "--user-agent" "Nixpkgs/${lib.trivial.release}" ];
   };
 
-  nativeBuildInputs = [ dpkg autoPatchelfHook qt5.wrapQtAppsHook shared-mime-info ];
+  nativeBuildInputs = [ dpkg autoPatchelfHook qt6.wrapQtAppsHook shared-mime-info ];
 
-  buildInputs = [ adept2-runtime qt5.qtbase qt5.qtscript qt5.qtmultimedia qt5.qtserialport ];
+  buildInputs = [
+    adept2-runtime
+    qt6.qtbase
+    qt6.qtmultimedia
+    qt6.qtserialport
+    qt6.qtdeclarative
+  ];
 
   runtimeDependencies = [ adept2-runtime ];
 
